@@ -1,0 +1,30 @@
+Compiled 1 Solidity file successfully (evm target: cancun).
+
+========================================
+🏠 Confidential Property Valuation v2.0
+========================================
+
+📍 Deploying from account: 0xb44582DD979944d3B4CAA9172c7B5520E5E10e36
+💰 Account balance: 0.053158421289435063 ETH
+
+🔐 Loading Pauser Addresses:
+   Total pausers to configure: 2
+
+⚠️  Warning: PAUSER_ADDRESS_0 is not set or is zero address
+   Using deployer address as fallback for pauser 0
+⚠️  Warning: PAUSER_ADDRESS_1 is not set or is zero address
+   Using deployer address as fallback for pauser 1
+
+🔑 KMS Generation: 1
+
+📝 Deploying ConfidentialPropertyValuation contract...
+   This may take a few minutes...
+
+
+❌ Deployment failed:
+ProviderError: insufficient funds for gas * price + value: balance 53158421289435063, tx cost 123036200000000000, overshot 69877778710564937
+    at HttpProvider.request (D:ConfidentialPropertyValuation-main\node_modules\hardhat\src\internal\core\providers\http.ts:116:21)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at HardhatEthersSigner.sendTransaction (D:\ConfidentialPropertyValuation-main\node_modules\@nomicfoundation\hardhat-ethers\src\signers.ts:181:18)
+    at ContractFactory.deploy (D:\ConfidentialPropertyValuation-main\node_modules\ethers\src.ts\contract\factory.ts:111:24)
+    at main (D:\ConfidentialPropertyValuation-main\scripts\deploy.js:47:20)
