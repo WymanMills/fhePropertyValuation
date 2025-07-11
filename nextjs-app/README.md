@@ -6,10 +6,10 @@ A modern, privacy-preserving real estate valuation platform built with **Next.js
 
 - ✅ **Next.js 14 App Router** - Latest Next.js with React Server Components
 - ✅ **TypeScript** - Full type safety
-- ✅ **RainbowKit** - Beautiful wallet connection UI (80%+ 获奖项目标准)
+- ✅ **RainbowKit** - Beautiful wallet connection UI
 - ✅ **Tailwind CSS** - Utility-first CSS framework
 - ✅ **Wagmi v2** - React Hooks for Ethereum
-- ✅ **玻璃态设计** - Glassmorphism UI (95%+ 获奖项目标准)
+- ✅ **玻璃态设计** - Glassmorphism UI 
 - ✅ **完全圆角** - Pill-shaped buttons and rounded cards
 - ✅ **响应式设计** - Mobile-first responsive layout
 - ✅ **Vercel 一键部署** - Ready for Vercel deployment
@@ -70,7 +70,7 @@ nextjs-app/
 └── package.json
 \`\`\`
 
-## 🎨 UI/UX Features (符合获奖标准)
+## 🎨 UI/UX Features 
 
 ### 1. CSS Variables System
 - ✅ Color system with \`--accent\`, \`--success\`, \`--error\`
