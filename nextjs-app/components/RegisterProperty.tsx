@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi';
+import { decodeEventLog } from 'viem';
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/lib/contract';
 
 export function RegisterProperty() {
@@ -27,7 +28,7 @@ export function RegisterProperty() {
         // Find PropertyRegistered event
         const propertyRegisteredEvent = logs.find((log) => {
           try {
-            const decoded = publicClient.decodeEventLog({
+            const decoded = decodeEventLog({
               abi: CONTRACT_ABI,
               data: log.data,
               topics: log.topics,
@@ -39,7 +40,7 @@ export function RegisterProperty() {
         });
 
         if (propertyRegisteredEvent) {
-          const decoded = publicClient.decodeEventLog({
+          const decoded = decodeEventLog({
             abi: CONTRACT_ABI,
             data: propertyRegisteredEvent.data,
             topics: propertyRegisteredEvent.topics,
@@ -72,12 +73,12 @@ export function RegisterProperty() {
         abi: CONTRACT_ABI,
         functionName: 'registerProperty',
         args: [
-          BigInt(area),
-          BigInt(bedrooms),
-          BigInt(bathrooms),
-          BigInt(yearBuilt),
-          BigInt(floorLevel),
-          BigInt(locationScore),
+          parseInt(area),
+          parseInt(bedrooms),
+          parseInt(bathrooms),
+          parseInt(yearBuilt),
+          parseInt(floorLevel),
+          parseInt(locationScore),
         ],
       });
     } catch (error: any) {

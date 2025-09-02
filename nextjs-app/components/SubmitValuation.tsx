@@ -26,7 +26,7 @@ export function SubmitValuation() {
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: 'submitValuation',
-        args: [BigInt(propertyId), BigInt(estimatedValue), BigInt(confidenceScore)],
+        args: [BigInt(propertyId), BigInt(estimatedValue), parseInt(confidenceScore)],
       });
     } catch (err: any) {
       console.error('Valuation submission failed:', err);
