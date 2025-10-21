@@ -1,0 +1,15 @@
+# Security settings
+audit=true
+audit-level=moderate
+ignore-scripts=false
+
+# Performance
+prefer-offline=true
+fetch-retries=3
+fetch-retry-factor=10
+fetch-retry-mintimeout=10000
+fetch-retry-maxtimeout=60000
+
+# Lock file
+package-lock=true
+save-exact=false
