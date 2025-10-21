@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidential Property Valuation System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" integrity="sha512-JNGzaLU3tnzvmC4WOCNjf5jKOFEBZRDHpbJnMxzl7xW7A6eIzCryDI+qMDf5aKPkK/hUOaKGwb5wnZgMKyFTdOQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // Fallback CDN if primary fails
+        if (typeof ethers === 'undefined') {
+            document.write('<script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"><\/script>');
+        }
+    </script>
+    <style>
+        /* ============================================
+           CSS Variables System
+           ============================================ */
+        :root {
+            /* Colors */
+            --color-bg: #070910;
+            --color-text: #f5f7ff;
+            --color-text-muted: rgba(198, 207, 232, 0.72);
+            --color-panel: rgba(16, 20, 36, 0.92);
+            --color-panel-alt: rgba(20, 24, 42, 0.95);
+            --color-border: rgba(120, 142, 182, 0.22);
+            --color-border-strong: rgba(120, 142, 182, 0.42);
+
+            /* Accent Colors */
+            --accent: #6d6eff;
+            --accent-hover: #5456ff;
+            --success: #2bc37b;
+            --success-soft: rgba(43, 195, 123, 0.16);
+            --warning: #f3b13b;
+            --error: #ef5350;
+            --info: #3b82f6;
+
+            /* Spacing (8px system) */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+
+            /* Border Radius */
+            --radius-sm: 0.5rem;
+            --radius-md: 1.05rem;
+            --radius-lg: 1.35rem;
+            --radius-full: 999px;
+
+            /* Transitions */
+            --transition: 180ms cubic-bezier(0.2, 0.9, 0.35, 1);
+            --transition-smooth: 300ms ease-out;
+
+            /* Fonts */
+            --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'SFMono-Regular', Menlo, Consolas, monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ============================================
+           Body & Background (Glassmorphism + Gradient)
+           ============================================ */
+        body {
+            font-family: var(--font-sans);
+            background: radial-gradient(circle at 20% -10%, rgba(109, 110, 255, 0.25), transparent 55%),
+                        radial-gradient(circle at 80% 0%, rgba(43, 195, 123, 0.08), transparent 60%),
+                        linear-gradient(160deg, #050614 0%, #050712 100%);
+            min-height: 100vh;
+            color: var(--color-text);
+            font-size: 14px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================
+           Container & Layout
+           ============================================ */
+        .container {
+            width: min(960px, 100% - 2.4rem);
+            margin: 0 auto;
+            padding: var(--space-5) 1.25rem;
+        }
+
+        /* ============================================
+           Header
+           ============================================ */
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-6);
+            padding: var(--space-5) 0;
+        }
+
+        .header h1 {
+            font-size: clamp(1.7rem, 1.3rem + 1.2vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: var(--space-3);
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1.05rem);
+            color: var(--color-text-muted);
+            font-weight: 400;
+        }
+
+        /* ============================================
+           Card (Glassmorphism)
+           ============================================ */
+        .card {
+            background: var(--color-panel);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 18px 42px -32px rgba(5, 8, 18, 0.9);
+            padding: 1.5rem;
+            margin-bottom: var(--space-5);
+            transition: all var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--color-border-strong);
+            box-shadow: 0 24px 48px -24px rgba(5, 8, 18, 0.95);
+        }
+
+        /* ============================================
+           Section Title
+           ============================================ */
+        .section-title {
+            font-size: clamp(1.05rem, 1rem + 0.3vw, 1.3rem);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            color: var(--color-text);
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        /* ============================================
+           Form Elements
+           ============================================ */
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--color-text);
+            letter-spacing: 0.01em;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            background: rgba(10, 13, 22, 0.9);
+            color: var(--color-text);
+            font-family: var(--font-sans);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(109, 110, 255, 0.2);
+            background: rgba(10, 13, 22, 1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--color-text-muted);
+        }
+
+        /* ============================================
+           Buttons (Pill Shape)
+           ============================================ */
+        .btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #ffffff;
+            border: none;
+            padding: 0.65rem 1.35rem;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all var(--transition);
+            margin: var(--space-1);
+            font-family: var(--font-sans);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(109, 110, 255, 0.35);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.18);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.28);
+            box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
+        }
+
+        /* ============================================
+           Grid Layout (Responsive)
+           ============================================ */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-5);
+        }
+
+        /* ============================================
+           Status Box
+           ============================================ */
+        .status-box {
+            background: var(--color-panel-alt);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin: var(--space-3) 0;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+
+        .status-connected {
+            border-color: rgba(43, 195, 123, 0.28);
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .status-error {
+            border-color: rgba(239, 83, 80, 0.28);
+            background: rgba(239, 83, 80, 0.16);
+            color: var(--error);
+        }
+
+        /* ============================================
+           Item Cards (Property & Valuation)
+           ============================================ */
+        .property-item {
+            background: rgba(109, 110, 255, 0.08);
+            border: 1px solid rgba(109, 110, 255, 0.24);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin: var(--space-3) 0;
+            border-radius: var(--radius-md);
+            transition: all var(--transition);
+        }
+
+        .property-item:hover {
+            border-color: rgba(109, 110, 255, 0.42);
+            transform: translateX(2px);
+        }
+
+        .valuation-item {
+            background: var(--success-soft);
+            border: 1px solid rgba(43, 195, 123, 0.24);
+            border-left: 3px solid var(--success);
+            padding: 1rem;
+            margin: var(--space-3) 0;
+            border-radius: var(--radius-md);
+            transition: all var(--transition);
+        }
+
+        .valuation-item:hover {
+            border-color: rgba(43, 195, 123, 0.42);
+            transform: translateX(2px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #ff6b6b;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff6b6b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* ============================================
+           Responsive Design
+           ============================================ */
+        @media (max-width: 960px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .two-column, .three-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: var(--space-4) 1rem;
+            }
+
+            .header {
+                padding: var(--space-4) 0;
+            }
+
+            .card {
+                padding: 1.2rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin: var(--space-2) 0;
+            }
+
+            .form-group input, .form-group select {
+                font-size: 16px; /* Prevent iOS zoom */
+            }
+        }
+
+        /* ============================================
+           Info Text Box
+           ============================================ */
+        .info-text {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.24);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin: var(--space-4) 0;
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Confidential Property Valuation System</h1>
+            <p>Privacy-Preserving Real Estate Assessment Platform</p>
+        </div>
+
+        <div id="connectionStatus" class="status-box">
+            <strong>Connection Status:</strong> <span id="statusText">Not Connected</span>
+        </div>
+
+        <div class="card">
+            <button id="connectWallet" class="btn">Connect MetaMask Wallet</button>
+            <button id="switchNetwork" class="btn btn-secondary hidden">Switch to Sepolia</button>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2 class="section-title">📝 Register Property</h2>
+                <div class="info-text">
+                    Register your property with encrypted details. All sensitive information is protected using FHE encryption.
+                </div>
+
+                <div class="form-group">
+                    <label for="propertyArea">Area (square meters):</label>
+                    <input type="number" id="propertyArea" min="1" placeholder="e.g., 120">
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="propertyBedrooms">Bedrooms:</label>
+                        <input type="number" id="propertyBedrooms" min="0" placeholder="e.g., 3">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="propertyBathrooms">Bathrooms:</label>
+                        <input type="number" id="propertyBathrooms" min="0" placeholder="e.g., 2">
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="propertyYearBuilt">Year Built:</label>
+                        <input type="number" id="propertyYearBuilt" min="1800" max="2024" placeholder="e.g., 2010">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="propertyFloorLevel">Floor Level:</label>
+                        <input type="number" id="propertyFloorLevel" min="0" placeholder="e.g., 5">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="propertyLocationScore">Location Score (1-100):</label>
+                    <input type="number" id="propertyLocationScore" min="1" max="100" placeholder="e.g., 85">
+                </div>
+
+                <button id="registerProperty" class="btn">Register Property</button>
+
+                <div class="loading" id="registerLoading">
+                    <div class="spinner"></div>
+                    <p>Registering property on blockchain...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title">💰 Submit Valuation</h2>
+                <div class="info-text">
+                    Authorized valuators can submit encrypted property valuations.
+                </div>
+
+                <div class="form-group">
+                    <label for="valuationPropertyId">Property ID:</label>
+                    <input type="number" id="valuationPropertyId" min="1" placeholder="e.g., 1">
+                </div>
+
+                <div class="form-group">
+                    <label for="valuationAmount">Estimated Value (USD):</label>
+                    <input type="number" id="valuationAmount" min="1" placeholder="e.g., 500000">
+                </div>
+
+                <div class="form-group">
+                    <label for="valuationConfidence">Confidence Score (1-100):</label>
+                    <input type="number" id="valuationConfidence" min="1" max="100" placeholder="e.g., 90">
+                </div>
+
+                <button id="submitValuation" class="btn">Submit Valuation</button>
+
+                <div class="loading" id="valuationLoading">
+                    <div class="spinner"></div>
+                    <p>Submitting encrypted valuation...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2 class="section-title">📊 View Properties</h2>
+                <div class="info-text">
+                    View properties you own and their valuation history.
+                </div>
+
+                <button id="loadProperties" class="btn">Load My Properties</button>
+
+                <div class="loading" id="propertiesLoading">
+                    <div class="spinner"></div>
+                    <p>Loading properties...</p>
+                </div>
+
+                <div id="propertiesList"></div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title">🔍 Valuation Management</h2>
+                <div class="info-text">
+                    Request revelation of valuations and view average estimates.
+                </div>
+
+                <div class="status-box status-error" style="margin: 15px 0;">
+                    <strong>⚠️ KMS Gateway Required:</strong> The reveal function requires Gateway infrastructure (not currently configured). Property registration and valuation submission work normally. See README.md for details.
+                </div>
+
+                <div class="form-group">
+                    <label for="revealValuationId">Valuation ID:</label>
+                    <input type="number" id="revealValuationId" min="1" placeholder="e.g., 1">
+                </div>
+
+                <button id="revealValuation" class="btn">Request Valuation Reveal</button>
+
+                <div class="form-group" style="margin-top: 30px;">
+                    <label for="averagePropertyId">Property ID for Average:</label>
+                    <input type="number" id="averagePropertyId" min="1" placeholder="e.g., 1">
+                </div>
+
+                <button id="getAverage" class="btn">Get Average Valuation</button>
+
+                <div class="loading" id="managementLoading">
+                    <div class="spinner"></div>
+                    <p>Processing request...</p>
+                </div>
+
+                <div id="managementResults"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">⚙️ Admin Functions</h2>
+            <div class="info-text">
+                Contract owner can manage valuator authorizations.
+            </div>
+
+            <div class="form-group">
+                <label for="valuatorAddress">Valuator Address:</label>
+                <input type="text" id="valuatorAddress" placeholder="0x...">
+            </div>
+
+            <button id="authorizeValuator" class="btn">Authorize Valuator</button>
+            <button id="revokeValuator" class="btn btn-secondary">Revoke Valuator</button>
+
+            <div class="loading" id="adminLoading">
+                <div class="spinner"></div>
+                <p>Processing admin action...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONTRACT_ADDRESS = '0xbc70aFE54495D028586f7E77c257359F1FDf6483';
+        const CONTRACT_ABI = [
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"internalType": "uint32", "name": "_area", "type": "uint32"},
+                    {"internalType": "uint32", "name": "_bedrooms", "type": "uint32"},
+                    {"internalType": "uint32", "name": "_bathrooms", "type": "uint32"},
+                    {"internalType": "uint32", "name": "_yearBuilt", "type": "uint32"},
+                    {"internalType": "uint32", "name": "_floorLevel", "type": "uint32"},
+                    {"internalType": "uint32", "name": "_locationScore", "type": "uint32"}
+                ],
+                "name": "registerProperty",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"internalType": "uint256", "name": "propertyId", "type": "uint256"},
+                    {"internalType": "uint64", "name": "_estimatedValue", "type": "uint64"},
+                    {"internalType": "uint32", "name": "_confidenceScore", "type": "uint32"}
+                ],
+                "name": "submitValuation",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "valuator", "type": "address"}],
+                "name": "authorizeValuator",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "valuator", "type": "address"}],
+                "name": "revokeValuator",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "valuationId", "type": "uint256"}],
+                "name": "requestValuationReveal",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "propertyId", "type": "uint256"}],
+                "name": "calculateAverageValuation",
+                "outputs": [
+                    {"internalType": "bool", "name": "hasRevealed", "type": "bool"},
+                    {"internalType": "uint64", "name": "averageValue", "type": "uint64"},
+                    {"internalType": "uint32", "name": "averageConfidence", "type": "uint32"},
+                    {"internalType": "uint256", "name": "valuationCount", "type": "uint256"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "propertyOwner", "type": "address"}],
+                "name": "getOwnerProperties",
+                "outputs": [{"internalType": "uint256[]", "name": "", "type": "uint256[]"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {"indexed": true, "internalType": "uint256", "name": "propertyId", "type": "uint256"},
+                    {"indexed": true, "internalType": "address", "name": "owner", "type": "address"}
+                ],
+                "name": "PropertyRegistered",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {"indexed": true, "internalType": "uint256", "name": "valuationId", "type": "uint256"},
+                    {"indexed": true, "internalType": "uint256", "name": "propertyId", "type": "uint256"},
+                    {"indexed": true, "internalType": "address", "name": "valuator", "type": "address"}
+                ],
+                "name": "ValuationSubmitted",
+                "type": "event"
+            }
+        ];
+
+        let provider;
+        let signer;
+        let contract;
+        let userAddress;
+
+        // UI Elements
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const switchNetworkBtn = document.getElementById('switchNetwork');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+
+        // Initialize app
+        async function init() {
+            // Check if ethers is loaded
+            if (typeof ethers === 'undefined') {
+                updateConnectionStatus('Ethers library not loaded. Please refresh the page.', true);
+                return;
+            }
+
+            if (typeof window.ethereum !== 'undefined') {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                updateConnectionStatus('MetaMask detected', false);
+            } else {
+                updateConnectionStatus('MetaMask not detected. Please install MetaMask.', true);
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(message, isError = false) {
+            statusText.textContent = message;
+            connectionStatus.className = isError ? 'status-box status-error' : 'status-box status-connected';
+        }
+
+        // Connect wallet
+        async function connectWallet() {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+
+                const network = await provider.getNetwork();
+                if (network.chainId !== 11155111) { // Sepolia testnet
+                    switchNetworkBtn.classList.remove('hidden');
+                    updateConnectionStatus(`Connected to ${userAddress.substring(0, 6)}...${userAddress.substring(38)} (Wrong network)`, true);
+                } else {
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    updateConnectionStatus(`Connected to ${userAddress.substring(0, 6)}...${userAddress.substring(38)} on Sepolia`, false);
+                    connectWalletBtn.textContent = 'Connected';
+                    connectWalletBtn.disabled = true;
+                }
+            } catch (error) {
+                console.error('Connection failed:', error);
+                updateConnectionStatus('Failed to connect wallet', true);
+            }
+        }
+
+        // Switch to Sepolia network
+        async function switchToSepolia() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0xaa36a7' }], // Sepolia chainId in hex
+                });
+
+                // Reconnect after network switch
+                setTimeout(connectWallet, 1000);
+                switchNetworkBtn.classList.add('hidden');
+            } catch (error) {
+                console.error('Failed to switch network:', error);
+                updateConnectionStatus('Failed to switch to Sepolia network', true);
+            }
+        }
+
+        // Show/hide loading
+        function toggleLoading(elementId, show) {
+            const loading = document.getElementById(elementId);
+            if (show) {
+                loading.classList.add('show');
+            } else {
+                loading.classList.remove('show');
+            }
+        }
+
+        // Register property
+        async function registerProperty() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const area = document.getElementById('propertyArea').value;
+            const bedrooms = document.getElementById('propertyBedrooms').value;
+            const bathrooms = document.getElementById('propertyBathrooms').value;
+            const yearBuilt = document.getElementById('propertyYearBuilt').value;
+            const floorLevel = document.getElementById('propertyFloorLevel').value;
+            const locationScore = document.getElementById('propertyLocationScore').value;
+
+            if (!area || !bedrooms || !bathrooms || !yearBuilt || !floorLevel || !locationScore) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                toggleLoading('registerLoading', true);
+
+                const tx = await contract.registerProperty(
+                    parseInt(area),
+                    parseInt(bedrooms),
+                    parseInt(bathrooms),
+                    parseInt(yearBuilt),
+                    parseInt(floorLevel),
+                    parseInt(locationScore)
+                );
+
+                const receipt = await tx.wait();
+
+                // Find PropertyRegistered event
+                const event = receipt.events.find(e => e.event === 'PropertyRegistered');
+                const propertyId = event ? event.args.propertyId.toString() : 'Unknown';
+
+                alert(`Property registered successfully! Property ID: ${propertyId}`);
+
+                // Clear form
+                document.getElementById('propertyArea').value = '';
+                document.getElementById('propertyBedrooms').value = '';
+                document.getElementById('propertyBathrooms').value = '';
+                document.getElementById('propertyYearBuilt').value = '';
+                document.getElementById('propertyFloorLevel').value = '';
+                document.getElementById('propertyLocationScore').value = '';
+
+            } catch (error) {
+                console.error('Registration failed:', error);
+                alert(`Registration failed: ${error.message}`);
+            } finally {
+                toggleLoading('registerLoading', false);
+            }
+        }
+
+        // Submit valuation
+        async function submitValuation() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const propertyId = document.getElementById('valuationPropertyId').value;
+            const amount = document.getElementById('valuationAmount').value;
+            const confidence = document.getElementById('valuationConfidence').value;
+
+            if (!propertyId || !amount || !confidence) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                toggleLoading('valuationLoading', true);
+
+                const tx = await contract.submitValuation(
+                    parseInt(propertyId),
+                    parseInt(amount),
+                    parseInt(confidence)
+                );
+
+                const receipt = await tx.wait();
+
+                // Find ValuationSubmitted event
+                const event = receipt.events.find(e => e.event === 'ValuationSubmitted');
+                const valuationId = event ? event.args.valuationId.toString() : 'Unknown';
+
+                alert(`Valuation submitted successfully! Valuation ID: ${valuationId}`);
+
+                // Clear form
+                document.getElementById('valuationPropertyId').value = '';
+                document.getElementById('valuationAmount').value = '';
+                document.getElementById('valuationConfidence').value = '';
+
+            } catch (error) {
+                console.error('Valuation submission failed:', error);
+
+                let errorMsg = 'Valuation submission failed. ';
+                if (error.message.includes('Not authorized valuator')) {
+                    errorMsg += '\n\nYou are not authorized as a valuator. Please ask the contract owner to authorize your address first using the Admin Functions section.';
+                } else if (error.message.includes('Property not active')) {
+                    errorMsg += '\n\nThis property is not active or does not exist.';
+                } else if (error.message.includes('Confidence score')) {
+                    errorMsg += '\n\nConfidence score must be between 1 and 100.';
+                } else {
+                    errorMsg += '\n\n' + error.message;
+                }
+
+                alert(errorMsg);
+            } finally {
+                toggleLoading('valuationLoading', false);
+            }
+        }
+
+        // Load user properties
+        async function loadProperties() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            try {
+                toggleLoading('propertiesLoading', true);
+
+                const properties = await contract.getOwnerProperties(userAddress);
+
+                const propertiesList = document.getElementById('propertiesList');
+                propertiesList.innerHTML = '';
+
+                if (properties.length === 0) {
+                    propertiesList.innerHTML = '<div class="info-text">No properties found.</div>';
+                    return;
+                }
+
+                for (const propertyId of properties) {
+                    const propertyDiv = document.createElement('div');
+                    propertyDiv.className = 'property-item';
+                    propertyDiv.innerHTML = `
+                        <h4>Property #${propertyId.toString()}</h4>
+                        <p>Property registered on blockchain</p>
+                        <p><strong>Owner:</strong> You</p>
+                    `;
+                    propertiesList.appendChild(propertyDiv);
+                }
+
+            } catch (error) {
+                console.error('Failed to load properties:', error);
+                alert(`Failed to load properties: ${error.message}`);
+            } finally {
+                toggleLoading('propertiesLoading', false);
+            }
+        }
+
+        // Request valuation reveal
+        async function requestValuationReveal() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const valuationId = document.getElementById('revealValuationId').value;
+            if (!valuationId) {
+                alert('Please enter a valuation ID');
+                return;
+            }
+
+            try {
+                toggleLoading('managementLoading', true);
+
+                const tx = await contract.requestValuationReveal(parseInt(valuationId));
+                await tx.wait();
+
+                alert('Valuation reveal requested successfully!\n\nThe decryption request has been sent to the Gateway. The valuation will be revealed once the KMS processes the request.');
+                document.getElementById('revealValuationId').value = '';
+
+            } catch (error) {
+                console.error('Reveal request failed:', error);
+
+                let errorMsg = 'Reveal request failed. ';
+
+                // Check for KMS Gateway infrastructure error
+                if (error.message.includes('cannot estimate gas') ||
+                    error.message.includes('execution reverted') ||
+                    error.code === 'UNPREDICTABLE_GAS_LIMIT') {
+                    errorMsg = '⚠️ KMS Gateway Infrastructure Required\n\n';
+                    errorMsg += 'The valuation reveal function requires:\n';
+                    errorMsg += '• Configured Gateway Contract\n';
+                    errorMsg += '• Active KMS Nodes\n';
+                    errorMsg += '• Coprocessor Infrastructure\n\n';
+                    errorMsg += 'These are not currently configured in the deployed contract.\n\n';
+                    errorMsg += '✅ Working features:\n';
+                    errorMsg += '• Property registration\n';
+                    errorMsg += '• Valuation submission\n';
+                    errorMsg += '• Authorization management\n\n';
+                    errorMsg += '📝 Note: The contract source code has been updated with an alternative approach that works without KMS Gateway. See README.md for details.';
+                } else if (error.message.includes('Valuation not found')) {
+                    errorMsg += '\n\nValuation ID not found. Please check the ID and try again.';
+                } else if (error.message.includes('Not authorized to reveal')) {
+                    errorMsg += '\n\nYou are not authorized to reveal this valuation. Only the property owner or the valuator can request reveal.';
+                } else if (error.message.includes('Already revealed')) {
+                    errorMsg += '\n\nThis valuation has already been revealed.';
+                } else {
+                    errorMsg += '\n\n' + error.message;
+                }
+
+                alert(errorMsg);
+            } finally {
+                toggleLoading('managementLoading', false);
+            }
+        }
+
+        // Get average valuation
+        async function getAverageValuation() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const propertyId = document.getElementById('averagePropertyId').value;
+            if (!propertyId) {
+                alert('Please enter a property ID');
+                return;
+            }
+
+            try {
+                toggleLoading('managementLoading', true);
+
+                const result = await contract.calculateAverageValuation(parseInt(propertyId));
+
+                const resultsDiv = document.getElementById('managementResults');
+                if (result.hasRevealed) {
+                    resultsDiv.innerHTML = `
+                        <div class="valuation-item">
+                            <h4>Average Valuation for Property #${propertyId}</h4>
+                            <p><strong>Average Value:</strong> $${result.averageValue.toString()}</p>
+                            <p><strong>Average Confidence:</strong> ${result.averageConfidence.toString()}%</p>
+                            <p><strong>Number of Valuations:</strong> ${result.valuationCount.toString()}</p>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="info-text">
+                            <h4>No revealed valuations for property #${propertyId}</h4>
+                            <p><strong>Total valuations:</strong> ${result.valuationCount.toString()}</p>
+                            <p>Valuations must be revealed before averages can be calculated. Please request reveal for individual valuations first.</p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Failed to get average valuation:', error);
+
+                let errorMsg = 'Failed to get average valuation. ';
+                if (error.message.includes('Not authorized')) {
+                    errorMsg += '\n\nYou are not authorized to view this property\'s valuations. Only the property owner or contract owner can view this information.';
+                } else if (error.message.includes('Property not active')) {
+                    errorMsg += '\n\nThis property is not active or does not exist.';
+                } else {
+                    errorMsg += '\n\n' + error.message;
+                }
+
+                alert(errorMsg);
+            } finally {
+                toggleLoading('managementLoading', false);
+            }
+        }
+
+        // Authorize valuator
+        async function authorizeValuator() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const address = document.getElementById('valuatorAddress').value;
+            if (!address) {
+                alert('Please enter a valuator address');
+                return;
+            }
+
+            try {
+                toggleLoading('adminLoading', true);
+
+                const tx = await contract.authorizeValuator(address);
+                await tx.wait();
+
+                alert('Valuator authorized successfully!');
+                document.getElementById('valuatorAddress').value = '';
+
+            } catch (error) {
+                console.error('Authorization failed:', error);
+                alert(`Authorization failed: ${error.message}`);
+            } finally {
+                toggleLoading('adminLoading', false);
+            }
+        }
+
+        // Revoke valuator
+        async function revokeValuator() {
+            if (!contract) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const address = document.getElementById('valuatorAddress').value;
+            if (!address) {
+                alert('Please enter a valuator address');
+                return;
+            }
+
+            try {
+                toggleLoading('adminLoading', true);
+
+                const tx = await contract.revokeValuator(address);
+                await tx.wait();
+
+                alert('Valuator revoked successfully!');
+                document.getElementById('valuatorAddress').value = '';
+
+            } catch (error) {
+                console.error('Revocation failed:', error);
+                alert(`Revocation failed: ${error.message}`);
+            } finally {
+                toggleLoading('adminLoading', false);
+            }
+        }
+
+        // Event listeners
+        connectWalletBtn.addEventListener('click', connectWallet);
+        switchNetworkBtn.addEventListener('click', switchToSepolia);
+        document.getElementById('registerProperty').addEventListener('click', registerProperty);
+        document.getElementById('submitValuation').addEventListener('click', submitValuation);
+        document.getElementById('loadProperties').addEventListener('click', loadProperties);
+        document.getElementById('revealValuation').addEventListener('click', requestValuationReveal);
+        document.getElementById('getAverage').addEventListener('click', getAverageValuation);
+        document.getElementById('authorizeValuator').addEventListener('click', authorizeValuator);
+        document.getElementById('revokeValuator').addEventListener('click', revokeValuator);
+
+        // Initialize app when page loads
+        window.addEventListener('load', function() {
+            // Wait a bit for ethers to be fully loaded
+            setTimeout(init, 100);
+        });
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length === 0) {
+                    updateConnectionStatus('Please connect to MetaMask', true);
+                    connectWalletBtn.textContent = 'Connect MetaMask Wallet';
+                    connectWalletBtn.disabled = false;
+                } else {
+                    connectWallet();
+                }
+            });
+
+            window.ethereum.on('chainChanged', function (chainId) {
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
