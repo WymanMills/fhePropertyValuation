@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.24-363636?logo=solidity)](https://docs.soliditylang.org/)
 
-**🌐 [Live Demo](https://your-app.vercel.app)** | **📹 [Video Demo](demo.mp4)** | **📜 [Contract](https://sepolia.etherscan.io/address/0xbc70aFE54495D028586f7E77c257359F1FDf6483)**
+**🌐 [Live Demo](https://wymanmills.github.io/fhePropertyValuation/)** | **📹 [Video Demo demo.mp4]** | **📜 [Contract](https://sepolia.etherscan.io/address/0xbc70aFE54495D028586f7E77c257359F1FDf6483)**
 
 A revolutionary property valuation platform that enables confidential real estate assessments using Fully Homomorphic Encryption (FHE). Property owners and valuators can interact with encrypted data without revealing sensitive information, ensuring complete privacy while maintaining transparency and trust.
 
