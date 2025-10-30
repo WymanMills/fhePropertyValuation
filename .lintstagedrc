@@ -1,0 +1,13 @@
+{
+  "*.sol": [
+    "prettier --write",
+    "solhint --fix"
+  ],
+  "*.js": [
+    "prettier --write",
+    "eslint --fix"
+  ],
+  "*.{json,md}": [
+    "prettier --write"
+  ]
+}
