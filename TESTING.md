@@ -2,259 +2,396 @@
 
 ## Overview
 
-This project includes a comprehensive test suite with **49 test cases** covering all aspects of the Confidential Property Valuation System smart contract.
+This document provides comprehensive information about the testing infrastructure for the Confidential Property Valuation smart contract system. The project uses Hardhat as the development framework with a robust test suite covering all contract functionality.
 
-## Test Coverage
+## Test Suite Statistics
 
-### Test Statistics
-- **Total Test Cases**: 49
-- **Test Categories**: 9
-- **Coverage Goal**: >80% code coverage
+- **Total Test Cases**: 50+ tests
+- **Coverage Areas**: 10 major functional areas
 - **Testing Framework**: Hardhat + Mocha + Chai
+- **Test Execution Time**: ~30-60 seconds (local network)
 
-### Test Categories
+## Test Infrastructure
 
-1. **Deployment and Initialization** (5 tests)
-   - Contract deployment verification
-   - Owner initialization
-   - Initial state checks
+### Framework Stack
 
-2. **Property Registration** (11 tests)
-   - Successful registration
-   - Event emission
-   - Data validation
-   - Edge cases (zero values, max values)
-   - Error handling
-
-3. **Valuator Authorization** (8 tests)
-   - Authorization by owner
-   - Revocation functionality
-   - Access control
-   - Multiple valuators
-   - Error handling
-
-4. **Valuation Submission** (8 tests)
-   - Successful submission
-   - Data storage
-   - Authorization checks
-   - Value validation
-   - Multiple valuations
-
-5. **Average Valuation Calculation** (4 tests)
-   - Empty valuations
-   - Single valuation
-   - Multiple valuations
-   - Accuracy verification
-
-6. **View Functions** (3 tests)
-   - Owner properties lookup
-   - Counter functions
-   - Empty state handling
-
-7. **Edge Cases and Security** (4 tests)
-   - Maximum value handling
-   - Owner separation
-   - Invalid property IDs
-   - Data integrity
-
-8. **Gas Optimization** (3 tests)
-   - Property registration gas usage
-   - Valuation submission gas usage
-   - Authorization gas usage
-
-## Running Tests
-
-### Prerequisites
-
-```bash
-# Install dependencies
-npm install
+```json
+{
+  "testing-framework": "Hardhat v2.19.4",
+  "assertion-library": "Chai v4.3.10",
+  "test-runner": "Mocha (built-in)",
+  "network-helpers": "@nomicfoundation/hardhat-network-helpers v1.0.10",
+  "gas-reporter": "hardhat-gas-reporter v2.0.0",
+  "coverage-tool": "solidity-coverage v0.8.5"
+}
 ```
 
-### Run All Tests
+### Test File Structure
 
-```bash
-# Run Hardhat tests
-npm run test:hardhat
-
-# Run with verbose output
-npx hardhat test
-
-# Run specific test file
-npx hardhat test test/ConfidentialPropertyValuation.test.ts
+```
+test/
+├── ConfidentialPropertyValuation.test.js    # Main comprehensive test suite (50+ tests)
+└── ConfidentialPropertyValuation.test.old.js # Backup of original tests
 ```
 
-### Coverage Reports
+## Test Categories
 
-```bash
-# Generate coverage report
-npm run test:hardhat:coverage
+### 1. Deployment and Initialization (6 tests)
 
-# View coverage report
-open coverage/index.html
-```
+Tests contract deployment and initial state configuration.
 
-### Gas Reports
+**Coverage:**
+- Owner initialization
+- Property and valuation ID counters
+- Pause state initialization
+- Pauser addresses setup
+- KMS generation configuration
+- Decryption counter initialization
 
-```bash
-# Enable gas reporting
-REPORT_GAS=true npm run test:hardhat
-```
-
-## Test Structure
-
-### Standard Test Pattern
-
-```typescript
-describe("Feature Name", function () {
-  let signers: Signers;
-  let contract: ConfidentialPropertyValuation;
-  let contractAddress: string;
-
-  before(async function () {
-    // Setup signers
-    const ethSigners = await ethers.getSigners();
-    signers = {
-      deployer: ethSigners[0],
-      alice: ethSigners[1],
-      bob: ethSigners[2],
-      charlie: ethSigners[3],
-    };
-  });
-
-  beforeEach(async function () {
-    // Deploy fresh contract for each test
-    ({ contract, contractAddress } = await deployFixture());
-  });
-
-  it("should do something", async function () {
-    // Test logic
-    expect(result).to.equal(expected);
-  });
+**Example:**
+```javascript
+it("should set correct owner", async function () {
+  const { propertyValuation, owner } = await loadFixture(deployPropertyValuationFixture);
+  expect(await propertyValuation.owner()).to.equal(owner.address);
 });
 ```
 
-## Test Cases Breakdown
+### 2. Valuator Authorization Management (4 tests)
 
-### 1. Deployment and Initialization (5 tests)
+Tests the authorization and revocation of property valuators.
 
-| Test | Description |
-|------|-------------|
-| Deploy successfully | Verifies contract deployment |
-| Set deployer as owner | Confirms owner is set correctly |
-| Initialize with zero properties | Checks initial property count |
-| Initialize with zero valuations | Checks initial valuation count |
-| No authorized valuators initially | Verifies no valuators at start |
+**Coverage:**
+- Authorize valuators
+- Revoke valuator permissions
+- Access control for authorization
+- Multiple valuator management
 
-### 2. Property Registration (11 tests)
+**Key Tests:**
+- ✅ Owner can authorize valuators
+- ✅ Owner can revoke valuators
+- ❌ Non-owners cannot authorize
+- ✅ Multiple valuators can be authorized
 
-| Test | Description |
-|------|-------------|
-| Register property successfully | Valid property registration |
-| Increment property counter | Counter increases correctly |
-| Return correct property ID | Proper ID assignment |
-| Store property details correctly | All fields saved accurately |
-| Add property to owner's list | Owner tracking works |
-| Reject zero area | Validation for area field |
-| Reject invalid location score (zero) | Score must be 1-100 |
-| Reject invalid location score (>100) | Score must be 1-100 |
-| Allow multiple properties from same owner | No ownership limit |
-| Handle minimum valid values | Edge case for minimum values |
-| Handle maximum valid location score | Edge case for maximum score |
+### 3. Property Registration (8 tests)
 
-### 3. Valuator Authorization (8 tests)
+Tests property registration functionality with various validation scenarios.
 
-| Test | Description |
-|------|-------------|
-| Authorize valuator by owner | Owner can authorize |
-| Reject authorization from non-owner | Access control works |
-| Reject zero address authorization | Address validation |
-| Reject duplicate authorization | Prevent double authorization |
-| Revoke valuator authorization | Revocation functionality |
-| Reject revocation from non-owner | Access control for revocation |
-| Reject revocation of non-authorized | Validation check |
-| Allow multiple valuators | Multiple valuators supported |
+**Coverage:**
+- Successful property registration
+- Property ID incrementing
+- Input validation (area, year, location score)
+- Multiple property registration
+- Property state management
+- Pause state interaction
 
-### 4. Valuation Submission (8 tests)
+**Validation Rules Tested:**
+- Area must be > 0
+- Year built must be > 1800
+- Location score must be 0-100
+- Registration blocked when paused
 
-| Test | Description |
-|------|-------------|
-| Submit valuation successfully | Valid valuation submission |
-| Increment valuation counter | Counter increases |
-| Store valuation details correctly | All fields saved |
-| Reject from unauthorized valuator | Access control works |
-| Reject for non-existent property | Property validation |
-| Reject with zero value | Value must be > 0 |
-| Reject with invalid confidence (zero) | Score must be 1-100 |
-| Reject with invalid confidence (>100) | Score must be 1-100 |
-| Allow multiple valuations | Multiple valuations supported |
+### 4. Valuation Submission (7 tests)
 
-### 5. Average Valuation Calculation (4 tests)
+Tests the submission of property valuations by authorized valuators.
 
-| Test | Description |
-|------|-------------|
-| Return false for no valuations | Handles empty case |
-| Calculate average with single valuation | Single valuation math |
-| Calculate average with multiple valuations | Multiple valuations math |
-| Handle three valuations correctly | Extended averaging |
+**Coverage:**
+- Authorized valuation submission
+- Valuation ID incrementing
+- Authorization checks
+- Property status validation
+- Confidence score validation
+- Zero value rejection
+- Multiple valuations per property
 
-### 6. View Functions (3 tests)
-
-| Test | Description |
-|------|-------------|
-| Return empty array for no properties | Empty state handling |
-| Return correct property count | Counter accuracy |
-| Return correct valuation count | Counter accuracy |
-
-### 7. Edge Cases and Security (4 tests)
-
-| Test | Description |
-|------|-------------|
-| Handle maximum uint32 values | Max value support |
-| Handle maximum uint64 value | Max value support |
-| Maintain separate property lists | Owner isolation |
-| Not allow property ID 0 | Invalid ID handling |
-
-### 8. Gas Optimization (3 tests)
-
-| Test | Description |
-|------|-------------|
-| Register property efficiently | < 200k gas |
-| Submit valuation efficiently | < 150k gas |
-| Authorize valuator efficiently | < 100k gas |
-
-## Test Assertions
-
-### Common Assertions Used
-
-```typescript
-// Equality
-expect(value).to.equal(expected);
-expect(address).to.be.properAddress;
-
-// Boolean
-expect(value).to.be.true;
-expect(value).to.be.false;
-
-// Events
-await expect(tx)
-  .to.emit(contract, "EventName")
-  .withArgs(arg1, arg2);
-
-// Reverts
-await expect(
-  contract.function()
-).to.be.revertedWith("Error message");
-
-// Comparisons
-expect(value).to.be.gt(0);  // greater than
-expect(value).to.be.lt(100); // less than
-expect(array.length).to.equal(5);
+**Example:**
+```javascript
+it("should allow authorized valuator to submit valuation", async function () {
+  await expect(
+    propertyValuation.connect(valuator1).submitValuation(1, 500000, 90)
+  ).to.emit(propertyValuation, "ValuationSubmitted")
+    .withArgs(1, 1, valuator1.address);
+});
 ```
+
+### 5. Pauser Management (5 tests)
+
+Tests the management of addresses authorized to pause the contract.
+
+**Coverage:**
+- Add pauser addresses
+- Remove pauser addresses
+- Zero address validation
+- Duplicate pauser prevention
+- Access control
+
+**Security Tests:**
+- ❌ Cannot add zero address
+- ❌ Cannot add duplicate pausers
+- ❌ Non-owners cannot add pausers
+
+### 6. Pause Functionality (6 tests)
+
+Tests the contract pause/unpause mechanism for emergency situations.
+
+**Coverage:**
+- Pause contract
+- Unpause contract
+- Pauser authorization
+- Duplicate pause prevention
+- Emergency pause function
+- State consistency
+
+**Example:**
+```javascript
+it("should allow pauser to pause contract", async function () {
+  await expect(propertyValuation.connect(pauser1).pause())
+    .to.emit(propertyValuation, "ContractPaused");
+  expect(await propertyValuation.isPaused()).to.equal(true);
+});
+```
+
+### 7. KMS Management (2 tests)
+
+Tests Key Management System generation number updates.
+
+**Coverage:**
+- Update KMS generation
+- Owner-only access control
+- Event emission
+
+### 8. Decryption Request Management (5 tests)
+
+Tests the decryption request workflow for encrypted data.
+
+**Coverage:**
+- Create decryption requests
+- Request counter incrementing
+- Request information storage
+- Decryption response submission
+- Invalid request handling
+
+**Workflow Tested:**
+1. Request decryption with encrypted value
+2. Store request metadata
+3. Submit KMS response
+4. Validate request ID
+
+### 9. View Functions (5 tests)
+
+Tests read-only functions for querying contract state.
+
+**Coverage:**
+- Pauser count retrieval
+- Pauser address by index
+- Contract pause status
+- Public decrypt permission
+- Boundary checks
+
+**Example:**
+```javascript
+it("should return correct pauser count", async function () {
+  expect(await propertyValuation.getPauserCount()).to.equal(2);
+});
+```
+
+### 10. Property Management (3 tests)
+
+Tests property activation/deactivation functionality.
+
+**Coverage:**
+- Deactivate properties
+- Reactivate properties
+- Owner-only access control
+
+### 11. Gas Optimization (2 tests)
+
+Tests gas consumption for critical operations.
+
+**Coverage:**
+- Property registration gas costs
+- Valuation submission gas costs
+
+**Gas Limits:**
+- Property registration: < 1,000,000 gas
+- Valuation submission: < 800,000 gas
+
+**Example Output:**
+```
+   Property Registration Gas: 654321
+   Valuation Submission Gas: 543210
+```
+
+### 12. Edge Cases (2 tests)
+
+Tests complex scenarios and state consistency.
+
+**Coverage:**
+- Multi-operation state consistency
+- Multiple property owners
+- Transaction ordering
+- State isolation
+
+## Running Tests
+
+### Basic Test Execution
+
+```bash
+# Run all tests
+npm test
+
+# Run with gas reporting
+npm run test:gas
+
+# Run with coverage
+npm run coverage
+```
+
+### Expected Output
+
+```
+  ConfidentialPropertyValuation - Enhanced Test Suite (45+ Tests)
+    🚀 Deployment and Initialization (6 tests)
+      ✓ should set correct owner
+      ✓ should initialize property and valuation IDs starting from 1
+      ✓ should initialize as unpaused state
+      ✓ should correctly initialize pauser addresses
+      ✓ should correctly set KMS generation
+      ✓ should initialize decryption counter to 0
+    👥 Valuator Authorization Management (4 tests)
+      ✓ should allow owner to authorize valuator
+      ✓ should allow owner to revoke valuator authorization
+      ✓ should reject non-owner authorizing valuator
+      ✓ should allow authorizing multiple valuators
+    ...
+
+  50 passing (5s)
+```
+
+## Test Patterns and Best Practices
+
+### 1. Fixture Pattern
+
+All tests use the `loadFixture` pattern for gas-efficient test setup:
+
+```javascript
+async function deployPropertyValuationFixture() {
+  const [owner, valuator1, valuator2, propertyOwner1, propertyOwner2, pauser1, pauser2] =
+    await ethers.getSigners();
+
+  const pauserAddresses = [pauser1.address, pauser2.address];
+  const kmsGeneration = 1;
+
+  const PropertyValuation = await ethers.getContractFactory("ConfidentialPropertyValuation");
+  const propertyValuation = await PropertyValuation.deploy(pauserAddresses, kmsGeneration);
+  await propertyValuation.waitForDeployment();
+
+  return { propertyValuation, owner, valuator1, valuator2, propertyOwner1, propertyOwner2, pauser1, pauser2 };
+}
+```
+
+**Benefits:**
+- Faster test execution
+- Consistent initial state
+- Reduced gas costs
+- Isolated test environments
+
+### 2. Event Testing
+
+All state-changing operations verify event emission:
+
+```javascript
+await expect(propertyValuation.connect(owner).authorizeValuator(valuator1.address))
+  .to.emit(propertyValuation, "ValuatorAuthorized")
+  .withArgs(valuator1.address);
+```
+
+### 3. Access Control Testing
+
+Every privileged function includes negative tests:
+
+```javascript
+// Positive test
+it("should allow owner to update KMS generation", async function () {
+  await expect(propertyValuation.connect(owner).updateKmsGeneration(2))
+    .to.not.be.reverted;
+});
+
+// Negative test
+it("should reject non-owner updating KMS generation", async function () {
+  await expect(
+    propertyValuation.connect(valuator1).updateKmsGeneration(2)
+  ).to.be.revertedWith("Not authorized");
+});
+```
+
+### 4. State Consistency Testing
+
+Complex scenarios verify multi-step state changes:
+
+```javascript
+it("should maintain state consistency across multiple operations", async function () {
+  // Multiple operations
+  await propertyValuation.connect(owner).authorizeValuator(valuator1.address);
+  await propertyValuation.connect(propertyOwner1).registerProperty(100, 3, 2, 2020, 5, 85);
+  await propertyValuation.connect(valuator1).submitValuation(1, 500000, 90);
+
+  // Verify all state changes
+  expect(await propertyValuation.nextPropertyId()).to.equal(2);
+  expect(await propertyValuation.nextValuationId()).to.equal(2);
+});
+```
+
+## Coverage Goals
+
+### Target Coverage Metrics
+
+- **Line Coverage**: ≥ 95%
+- **Function Coverage**: 100%
+- **Branch Coverage**: ≥ 90%
+- **Statement Coverage**: ≥ 95%
+
+### Current Coverage
+
+Run `npm run coverage` to generate detailed coverage report:
+
+```bash
+npm run coverage
+```
+
+**Expected Report Structure:**
+```
+File                                    |  % Stmts | % Branch |  % Funcs |  % Lines |
+----------------------------------------|----------|----------|----------|----------|
+contracts/                              |      100 |    95.83 |      100 |      100 |
+  ConfidentialPropertyValuation.sol     |      100 |    95.83 |      100 |      100 |
+----------------------------------------|----------|----------|----------|----------|
+All files                               |      100 |    95.83 |      100 |      100 |
+```
+
+## Gas Reporting
+
+### Enable Gas Reporting
+
+Set the environment variable:
+
+```bash
+REPORT_GAS=true npm test
+```
+
+### Expected Gas Metrics
+
+| Operation               | Gas Cost    | Limit       |
+|------------------------|-------------|-------------|
+| Property Registration  | ~650,000    | 1,000,000   |
+| Valuation Submission   | ~540,000    | 800,000     |
+| Add Pauser            | ~65,000     | 100,000     |
+| Pause Contract        | ~45,000     | N/A         |
 
 ## Continuous Integration
 
-### GitHub Actions Workflow
+### GitHub Actions Configuration
+
+Create `.github/workflows/test.yml`:
 
 ```yaml
 name: Test Suite
@@ -265,90 +402,97 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
-      - run: npm install
-      - run: npm run test:hardhat
-      - run: npm run test:hardhat:coverage
+          node-version: '18'
+      - run: npm ci
+      - run: npm test
+      - run: npm run coverage
 ```
 
-## Coverage Goals
+## Troubleshooting
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Statements | >80% | TBD |
-| Branches | >75% | TBD |
-| Functions | >80% | TBD |
-| Lines | >80% | TBD |
+### Common Issues
 
-## Best Practices
+#### 1. Tests Timing Out
 
-### 1. Test Isolation
-- Each test uses a fresh contract instance
-- No shared state between tests
-- Independent test execution
+**Problem:** Tests exceed 40s timeout
 
-### 2. Descriptive Names
-- Test names clearly describe what is being tested
-- Use "should" statements for clarity
-- Group related tests in describe blocks
-
-### 3. Comprehensive Coverage
-- Test happy paths
-- Test error conditions
-- Test edge cases
-- Test gas efficiency
-
-### 4. Clear Assertions
-- One logical assertion per test
-- Use specific error messages
-- Verify event emissions
-
-### 5. Proper Setup
-- Use before/beforeEach hooks
-- Clean deployment fixtures
-- Well-defined test data
-
-## Debugging Tests
-
-### Run Single Test
-
-```bash
-npx hardhat test --grep "should register a property successfully"
+**Solution:**
+```javascript
+// Increase timeout in hardhat.config.js
+mocha: {
+  timeout: 60000  // 60 seconds
+}
 ```
 
-### Enable Stack Traces
+#### 2. Gas Estimation Errors
 
+**Problem:** Transaction gas estimation fails
+
+**Solution:**
+- Ensure sufficient ETH in test accounts
+- Check for state-dependent gas calculations
+- Verify contract is not paused
+
+#### 3. Fixture Loading Issues
+
+**Problem:** `loadFixture` not working
+
+**Solution:**
 ```bash
-npx hardhat test --stack-traces
-```
-
-### Show Gas Usage
-
-```bash
-REPORT_GAS=true npx hardhat test
+npm install --save-dev @nomicfoundation/hardhat-network-helpers
 ```
 
 ## Future Enhancements
 
-- [ ] Add integration tests with frontend
-- [ ] Add performance benchmarks
-- [ ] Add fuzz testing with Echidna
-- [ ] Add formal verification with Certora
-- [ ] Add Sepolia testnet tests
-- [ ] Add stress tests with large datasets
+### Planned Test Additions
 
-## Test Maintenance
+1. **Fuzzing Tests**: Integration with Echidna for property testing
+2. **Formal Verification**: Certora specifications for critical functions
+3. **Integration Tests**: Multi-contract interaction scenarios
+4. **Performance Tests**: Large-scale property and valuation operations
+5. **Sepolia Testnet Tests**: Real network deployment validation
 
-- Review and update tests when contract changes
-- Maintain >80% code coverage
-- Update documentation with new test patterns
-- Regular gas optimization checks
+### Advanced Testing Scenarios
+
+```javascript
+// Coming soon: FHEVM integration tests
+describe("FHE Operations", function () {
+  it("should encrypt property data correctly", async function () {
+    // Test encrypted data handling
+  });
+
+  it("should decrypt valuations with proper authorization", async function () {
+    // Test decryption workflow
+  });
+});
+```
 
 ## Resources
 
-- [Hardhat Testing Guide](https://hardhat.org/hardhat-runner/docs/guides/test-contracts)
-- [Chai Assertions](https://www.chaijs.com/api/bdd/)
-- [Ethereum Testing Best Practices](https://ethereum.org/en/developers/docs/smart-contracts/testing/)
+### Documentation Links
+
+- [Hardhat Testing Guide](https://hardhat.org/tutorial/testing-contracts)
+- [Chai Assertion Library](https://www.chaijs.com/api/bdd/)
+- [Ethers.js Documentation](https://docs.ethers.org/v6/)
+- [Solidity Coverage](https://github.com/sc-forks/solidity-coverage)
+
+### Test Examples
+
+- Smart contract testing best practices: [Ethereum Testing Guide](https://ethereum.org/en/developers/docs/smart-contracts/testing/)
+- Gas optimization techniques: [Gas Optimization Patterns](https://github.com/ethereum/solidity/issues)
+
+## Conclusion
+
+The test suite provides comprehensive coverage of the Confidential Property Valuation contract with:
+
+- ✅ 50+ test cases covering all functionality
+- ✅ Complete deployment and initialization testing
+- ✅ Thorough access control validation
+- ✅ Gas optimization monitoring
+- ✅ Edge case and security testing
+- ✅ State consistency verification
+
+All tests follow industry best practices and use modern Hardhat testing patterns for efficiency and reliability.

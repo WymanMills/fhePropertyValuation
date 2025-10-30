@@ -1,7 +1,5 @@
 codecov:
   require_ci_to_pass: yes
-  notify:
-    wait_for_ci: yes
 
 coverage:
   precision: 2
@@ -13,37 +11,14 @@ coverage:
       default:
         target: auto
         threshold: 1%
-        base: auto
+        if_ci_failed: error
 
     patch:
       default:
         target: auto
         threshold: 1%
-        base: auto
 
 comment:
-  layout: "reach, diff, flags, files"
+  layout: "reach,diff,flags,tree"
   behavior: default
-  require_changes: false
-  require_base: false
-  require_head: true
-
-flags:
-  hardhat:
-    paths:
-      - contracts/
-    carryforward: true
-
-ignore:
-  - "test/**/*"
-  - "scripts/**/*"
-  - "node_modules/**/*"
-  - "typechain-types/**/*"
-  - "cache/**/*"
-  - "artifacts/**/*"
-  - "coverage/**/*"
-  - "dist/**/*"
-  - "public/**/*"
-  - "**/*.config.*"
-  - "**/*.test.*"
-  - "**/*.spec.*"
+  require_changes: no
