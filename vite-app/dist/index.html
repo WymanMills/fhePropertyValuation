@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confidential Property Valuation System</title>
+    <script type="module" crossorigin src="./assets/index-De01en4e.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/vendor-react-CqkleIqs.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-wagmi-_eIOl4oT.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-rainbowkit-CDyV7Ucd.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-3nQyJrEZ.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="text-center py-8">
+        <h1 class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-accent to-success bg-clip-text text-transparent">
+          🏠 Confidential Property Valuation System
+        </h1>
+        <p class="text-gray-400 text-base md:text-lg">Privacy-Preserving Real Estate Assessment Platform</p>
+      </div>
+
+      <div id="connectionStatus" class="status-box">
+        <strong>Connection Status:</strong> <span id="statusText">Not Connected</span>
+      </div>
+
+      <div class="glass-card">
+        <button id="connectWallet" class="btn-primary">Connect MetaMask Wallet</button>
+        <button id="switchNetwork" class="btn-secondary hidden">Switch to Sepolia</button>
+      </div>
+
+      <div class="grid-auto mb-5">
+        <div class="glass-card">
+          <h2 class="section-title">📝 Register Property</h2>
+          <div class="info-text">
+            Register your property with encrypted details. All sensitive information is protected using FHE encryption.
+          </div>
+
+          <form id="registerForm" class="space-y-4 mt-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2">Area (square meters):</label>
+              <input type="number" id="propertyArea" class="form-input" min="1" placeholder="e.g., 120" required>
+            </div>
+
+            <div class="grid-2-col">
+              <div>
+                <label class="block text-sm font-semibold mb-2">Bedrooms:</label>
+                <input type="number" id="propertyBedrooms" class="form-input" min="0" placeholder="e.g., 3" required>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2">Bathrooms:</label>
+                <input type="number" id="propertyBathrooms" class="form-input" min="0" placeholder="e.g., 2" required>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div>
+                <label class="block text-sm font-semibold mb-2">Year Built:</label>
+                <input type="number" id="propertyYearBuilt" class="form-input" min="1800" max="2024" placeholder="e.g., 2010" required>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2">Floor Level:</label>
+                <input type="number" id="propertyFloorLevel" class="form-input" min="0" placeholder="e.g., 5" required>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-2">Location Score (1-100):</label>
+              <input type="number" id="propertyLocationScore" class="form-input" min="1" max="100" placeholder="e.g., 85" required>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">Register Property</button>
+
+            <div class="loading" id="registerLoading">
+              <div class="spinner"></div>
+              <p>Registering property on blockchain...</p>
+            </div>
+
+            <div id="registerResult"></div>
+          </form>
+        </div>
+
+        <div class="glass-card">
+          <h2 class="section-title">💰 Submit Valuation</h2>
+          <div class="info-text">
+            Authorized valuators can submit encrypted property valuations.
+          </div>
+
+          <form id="valuationForm" class="space-y-4 mt-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2">Property ID:</label>
+              <input type="number" id="valuationPropertyId" class="form-input" min="1" placeholder="e.g., 1" required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-2">Estimated Value (USD):</label>
+              <input type="number" id="valuationAmount" class="form-input" min="1" placeholder="e.g., 500000" required>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-2">Confidence Score (1-100):</label>
+              <input type="number" id="valuationConfidence" class="form-input" min="1" max="100" placeholder="e.g., 90" required>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">Submit Valuation</button>
+
+            <div class="loading" id="valuationLoading">
+              <div class="spinner"></div>
+              <p>Submitting encrypted valuation...</p>
+            </div>
+
+            <div id="valuationResult"></div>
+          </form>
+        </div>
+      </div>
+
+      <div class="grid-auto mb-5">
+        <div class="glass-card">
+          <h2 class="section-title">📊 View Properties</h2>
+          <div class="info-text">
+            View properties you own and their valuation history.
+          </div>
+
+          <button id="loadProperties" class="btn-primary w-full mt-4">Load My Properties</button>
+
+          <div class="loading" id="propertiesLoading">
+            <div class="spinner"></div>
+            <p>Loading properties...</p>
+          </div>
+
+          <div id="propertiesList"></div>
+        </div>
+
+        <div class="glass-card">
+          <h2 class="section-title">⚙️ Admin Functions</h2>
+          <div class="info-text">
+            Contract owner can manage valuator authorizations.
+          </div>
+
+          <div class="space-y-4 mt-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2">Valuator Address:</label>
+              <input type="text" id="valuatorAddress" class="form-input" placeholder="0x...">
+            </div>
+
+            <div class="flex gap-2">
+              <button id="authorizeValuator" class="btn-primary flex-1">Authorize</button>
+              <button id="revokeValuator" class="btn-secondary flex-1">Revoke</button>
+            </div>
+
+            <div class="loading" id="adminLoading">
+              <div class="spinner"></div>
+              <p>Processing admin action...</p>
+            </div>
+
+            <div id="adminResult"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
