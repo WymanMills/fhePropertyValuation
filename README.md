@@ -9,7 +9,7 @@
 [![Security](https://img.shields.io/badge/Security-Audited-green)]()
 [![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)]()
 
-**🌐 Live Demo**: [View Demo ](https://wymanmills.github.io/fhePropertyValuation/) | **📹 Video**: [Watch Demo demo.mp4] | **📜 Contract**: [Sepolia Etherscan](https://sepolia.etherscan.io/address/0xbc70aFE54495D028586f7E77c257359F1FDf6483)
+**🌐 Live Demo**: [View Demo ](https://wymanmills.github.io/fhePropertyValuation/) | **📹 Video**: [Watch Demo](https://youtu.be/UGU8c9dQO0Q) | **📜 Contract**: [Sepolia Etherscan](https://sepolia.etherscan.io/address/0xbc70aFE54495D028586f7E77c257359F1FDf6483)
 
 ---
 
